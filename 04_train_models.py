@@ -7,14 +7,10 @@ import xgboost as xgb
 import pickle
 import time
 
-# ÉTAPE 4: TRAIN MODELS
 
-
-print("=" * 60)
 print("TRAINING MODELS")
-print("=" * 60)
 
-# Load prepared data
+
 X_train = np.load("X_train.npy")
 X_test = np.load("X_test.npy")
 y_train = np.load("y_train.npy")
@@ -27,12 +23,8 @@ print(f"  y_train shape: {y_train.shape}")
 print(f"  y_test shape: {y_test.shape}")
 
 
-# 1. LOGISTIC REGRESSION (Baseline)
-
-
-print(f"\n" + "=" * 60)
 print("1. LOGISTIC REGRESSION (Baseline)")
-print("=" * 60)
+
 
 start_time = time.time()
 
@@ -44,7 +36,6 @@ y_pred_proba_lr = lr.predict_proba(X_test)[:, 1]
 
 train_time_lr = time.time() - start_time
 
-# Metrics
 acc_lr = accuracy_score(y_test, y_pred_lr)
 prec_lr = precision_score(y_test, y_pred_lr)
 rec_lr = recall_score(y_test, y_pred_lr)
@@ -59,18 +50,18 @@ print(f"  F1-Score:  {f1_lr:.4f}")
 print(f"  ROC-AUC:   {auc_lr:.4f}")
 print(f"  Train time: {train_time_lr:.2f}s")
 
-# Save model
+
 with open("model_logistic_regression.pkl", "wb") as f:
     pickle.dump(lr, f)
 print("✓ Model saved: model_logistic_regression.pkl")
 
 
-# 2. RANDOM FOREST
 
 
-print(f"\n" + "=" * 60)
+
+
 print("2. RANDOM FOREST")
-print("=" * 60)
+
 
 start_time = time.time()
 
@@ -82,7 +73,7 @@ y_pred_proba_rf = rf.predict_proba(X_test)[:, 1]
 
 train_time_rf = time.time() - start_time
 
-# Metrics
+
 acc_rf = accuracy_score(y_test, y_pred_rf)
 prec_rf = precision_score(y_test, y_pred_rf)
 rec_rf = recall_score(y_test, y_pred_rf)
@@ -97,18 +88,14 @@ print(f"  F1-Score:  {f1_rf:.4f}")
 print(f"  ROC-AUC:   {auc_rf:.4f}")
 print(f"  Train time: {train_time_rf:.2f}s")
 
-# Save model
+
 with open("model_random_forest.pkl", "wb") as f:
     pickle.dump(rf, f)
-print("✓ Model saved: model_random_forest.pkl")
+print("saved")
 
 
-# 3. XGBOOST
-
-
-print(f"\n" + "=" * 60)
 print("3. XGBOOST")
-print("=" * 60)
+
 
 start_time = time.time()
 
@@ -127,7 +114,7 @@ y_pred_proba_xgb = xgb_model.predict_proba(X_test)[:, 1]
 
 train_time_xgb = time.time() - start_time
 
-# Metrics
+
 acc_xgb = accuracy_score(y_test, y_pred_xgb)
 prec_xgb = precision_score(y_test, y_pred_xgb)
 rec_xgb = recall_score(y_test, y_pred_xgb)
@@ -142,18 +129,16 @@ print(f"  F1-Score:  {f1_xgb:.4f}")
 print(f"  ROC-AUC:   {auc_xgb:.4f}")
 print(f"  Train time: {train_time_xgb:.2f}s")
 
-# Save model
+
 with open("model_xgboost.pkl", "wb") as f:
     pickle.dump(xgb_model, f)
-print("✓ Model saved: model_xgboost.pkl")
+print("saved")
 
 
-# 4. COMPARISON TABLE
 
 
-print(f"\n" + "=" * 60)
 print("MODEL COMPARISON")
-print("=" * 60)
+
 
 comparison = pd.DataFrame({
     'Model': ['Logistic Regression', 'Random Forest', 'XGBoost'],
@@ -165,35 +150,27 @@ comparison = pd.DataFrame({
     'Train Time (s)': [train_time_lr, train_time_rf, train_time_xgb]
 })
 
-print("\n")
+
 print(comparison.to_string(index=False))
 
-# Save comparison
+
 comparison.to_csv("model_comparison.csv", index=False)
-print("\n✓ Comparison saved: model_comparison.csv")
 
 
-# 5. BEST MODEL
 
-
-print(f"\n" + "=" * 60)
 print("BEST MODEL")
-print("=" * 60)
+
 
 best_model_idx = comparison['ROC-AUC'].idxmax()
 best_model_name = comparison.loc[best_model_idx, 'Model']
 best_model_auc = comparison.loc[best_model_idx, 'ROC-AUC']
 
-print(f"\n✓ Best Model: {best_model_name}")
+print(f"\n Best Model: {best_model_name}")
 print(f"  ROC-AUC: {best_model_auc:.4f}")
 
 
-# 6. SAVE PREDICTIONS
-
-
-print(f"\n" + "=" * 60)
 print("SAVING PREDICTIONS")
-print("=" * 60)
+
 
 predictions_df = pd.DataFrame({
     'y_true': y_test,
@@ -206,8 +183,6 @@ predictions_df = pd.DataFrame({
 })
 
 predictions_df.to_csv("predictions.csv", index=False)
-print("✓ Predictions saved: predictions.csv")
 
-print("\n" + "=" * 60)
-print("DONE!")
-print("=" * 60)
+
+
