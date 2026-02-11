@@ -3,12 +3,6 @@ import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
 
-
-
-
-
-
-
 stocks = [
     'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'AVGO', 'COST', 'ASML',
     'NFLX', 'ADOBE', 'INTC', 'AMD', 'CSCO', 'PYPL', 'ADBE', 'NFLX', 'CRM', 'DDOG',
@@ -20,10 +14,6 @@ stocks = [
 stocks = list(set(stocks))
 print(f"\nSelected {len(stocks)} stocks")
 print(f"Stocks: {', '.join(stocks[:10])}... and {len(stocks)-10} more")
-
-
-
-
 
 end_date = datetime.now()
 start_date = end_date - timedelta(days=730)
@@ -45,10 +35,7 @@ print(f"  Shape: {data.shape}")
 
 
 
-
-
 print("PREPARING DATA")
-
 
 all_data = []
 successful_stocks = 0
@@ -74,8 +61,6 @@ for stock in stocks:
         volume = volume[valid_mask]
         dates = dates[valid_mask]
         
-        
-
         
         close_tomorrow = close[1:]
         close_today = close[:-1]
@@ -105,10 +90,6 @@ for stock in stocks:
         continue
 
 
-
-
-
-
 print("COMBINING DATA")
 
 
@@ -125,14 +106,11 @@ print(f"  DOWN (0): {target_count.get(0, 0):6d} ({target_count.get(0, 0)/len(df_
 print(f"  UP   (1): {target_count.get(1, 0):6d} ({target_count.get(1, 0)/len(df_combined)*100:.1f}%)")
 
 
-
-
-
 print("SAVING DATA")
 
 
 df_combined.to_csv("data_raw.csv", index=False)
-print("✓ Raw data saved: data_raw.csv")
+print("saved")
 
 
 summary = df_combined.groupby('Stock').agg({
@@ -142,7 +120,7 @@ summary = df_combined.groupby('Stock').agg({
 }).round(2)
 
 summary.to_csv("data_summary.csv")
-print("✓ Summary saved: data_summary.csv")
+print("saved")
 
 
 print("done!")
