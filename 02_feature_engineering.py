@@ -1,23 +1,14 @@
 import numpy as np
 import pandas as pd
 
-# ============================================
-# ÉTAPE 2: FEATURE ENGINEERING (FIXED)
-# ============================================
 
-print("=" * 60)
 print("FEATURE ENGINEERING")
-print("=" * 60)
 
-# Load raw data
 df = pd.read_csv("data_raw.csv")
 df['Date'] = pd.to_datetime(df['Date'])
 
 print(f"\nInput data shape: {df.shape}")
 
-# ============================================
-# PROCESS EACH STOCK SEPARATELY
-# ============================================
 
 features_list = []
 
@@ -27,27 +18,23 @@ for stock in df['Stock'].unique():
     if len(stock_df) < 50:
         continue
     
-    # Get arrays
+   
     prices = stock_df['Close'].values
     volume = stock_df['Volume'].values
     n = len(prices)
     
-    # Create feature dataframe (same length as original)
+   
     features = stock_df[['Date', 'Stock', 'Close', 'Volume', 'Target']].copy()
     
-    # ============================================
-    # TECHNICAL INDICATORS
-    # ============================================
-    
-    # SMA
+
     features['SMA_20'] = pd.Series(prices).rolling(20).mean().values
     features['SMA_50'] = pd.Series(prices).rolling(50).mean().values
     
-    # EMA
+  
     features['EMA_12'] = pd.Series(prices).ewm(span=12).mean().values
     features['EMA_26'] = pd.Series(prices).ewm(span=26).mean().values
     
-    # RSI
+  
     delta = pd.Series(prices).diff()
     gain = delta.copy()
     gain[gain < 0] = 0
@@ -59,7 +46,7 @@ for stock in df['Stock'].unique():
     rs = avg_gain / (avg_loss + 1e-8)
     features['RSI_14'] = (100 - (100 / (1 + rs))).values
     
-    # MACD
+   
     ema12 = pd.Series(prices).ewm(span=12).mean()
     ema26 = pd.Series(prices).ewm(span=26).mean()
     macd = ema12 - ema26
@@ -68,7 +55,7 @@ for stock in df['Stock'].unique():
     features['MACD_Signal'] = signal.values
     features['MACD_Histogram'] = (macd - signal).values
     
-    # Bollinger Bands
+ 
     sma20 = pd.Series(prices).rolling(20).mean()
     std20 = pd.Series(prices).rolling(20).std()
     features['BB_Upper'] = (sma20 + 2*std20).values
@@ -77,68 +64,54 @@ for stock in df['Stock'].unique():
     features['BB_Width'] = (4*std20).values
     features['BB_Position'] = ((pd.Series(prices) - (sma20 - 2*std20)) / (4*std20 + 1e-8)).values
     
-    # Volatility
+
     features['Volatility_20'] = pd.Series(prices).rolling(20).std().values
     features['Volatility_50'] = pd.Series(prices).rolling(50).std().values
     
-    # Momentum
+  
     features['Momentum_10'] = (prices - np.roll(prices, 10)).astype(float)
     features['Momentum_20'] = (prices - np.roll(prices, 20)).astype(float)
     
-    # Returns
+ 
     returns_1d = pd.Series(prices).pct_change()
     returns_5d = pd.Series(prices).pct_change(5)
     features['Returns_1d'] = returns_1d.values
     features['Returns_5d'] = returns_5d.values
     
-    # Volume Indicators
+
     features['Volume_SMA_20'] = pd.Series(volume).rolling(20).mean().values
     features['Volume_Ratio'] = (pd.Series(volume) / (pd.Series(volume).rolling(20).mean() + 1e-8)).values
-    
-    # Price Range
+
     features['Price_Range_20'] = (pd.Series(prices).rolling(20).max() - pd.Series(prices).rolling(20).min()).values
     
     features_list.append(features)
     print(f"✓ {stock:6s} - features created")
 
-# ============================================
-# COMBINE ALL
-# ============================================
 
-print("\n" + "=" * 60)
+
 print("COMBINING FEATURES")
-print("=" * 60)
+
 
 df_features = pd.concat(features_list, ignore_index=True)
 
 print(f"Total records: {len(df_features)}")
 print(f"Total features: {len(df_features.columns)}")
 
-# ============================================
-# HANDLE NaN VALUES
-# ============================================
 
-print("\n" + "=" * 60)
 print("CLEANING DATA")
-print("=" * 60)
+
 
 print(f"Missing values: {df_features.isnull().sum().sum()}")
 
-# Forward fill, then backward fill
+
 df_features = df_features.fillna(method='ffill').fillna(method='bfill')
 
-# Drop remaining NaN
+
 df_features = df_features.dropna()
 
 print(f"After cleaning: {len(df_features)} records")
 
-# ============================================
-# SAVE
-# ============================================
-
 df_features.to_csv("data_features.csv", index=False)
-print("\n✓ Features saved: data_features.csv")
+print("saved")
 
-print("\n" + "=" * 60)
-print("DONE!")
-print("=" * 60)
+
