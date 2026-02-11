@@ -4,14 +4,9 @@ import yfinance as yf
 from datetime import datetime, timedelta
 
 
-# ÉTAPE 1: FETCH DATA FROM YAHOO FINANCE
 
 
-print("=" * 60)
-print("FETCHING STOCK DATA FROM YAHOO FINANCE")
-print("=" * 60)
 
-# 1. SELECT STOCKS
 
 
 stocks = [
@@ -27,7 +22,7 @@ print(f"\nSelected {len(stocks)} stocks")
 print(f"Stocks: {', '.join(stocks[:10])}... and {len(stocks)-10} more")
 
 
-# 2. DOWNLOAD DATA FROM YAHOO FINANCE
+
 
 
 end_date = datetime.now()
@@ -35,7 +30,7 @@ start_date = end_date - timedelta(days=730)
 
 print(f"\nDate range: {start_date.date()} to {end_date.date()}")
 print(f"Downloading from: https://finance.yahoo.com")
-print("-" * 60)
+
 
 data = yf.download(
     stocks,
@@ -48,19 +43,18 @@ print(f"✓ Data downloaded successfully!")
 print(f"  Shape: {data.shape}")
 
 
-# 3. PREPARE DATA FOR EACH STOCK
 
 
-print("\n" + "=" * 60)
+
+
 print("PREPARING DATA")
-print("=" * 60)
+
 
 all_data = []
 successful_stocks = 0
 
 for stock in stocks:
     try:
-        # Get close price and volume for this stock
         if len(stocks) == 1:
             close = data['Close'].values
             volume = data['Volume'].values
@@ -70,7 +64,7 @@ for stock in stocks:
             volume = data['Volume'][stock].values
             dates = data.index
         
-        # Remove NaN and zero volume
+
         valid_mask = ~(np.isnan(close) | np.isnan(volume) | (volume == 0))
         
         if valid_mask.sum() < 100:
@@ -81,22 +75,16 @@ for stock in stocks:
         dates = dates[valid_mask]
         
         
-        # 4. CREATE TARGET: UP (1) or DOWN (0)
-       
-        
-        # If tomorrow's price > today's price → UP (1)
-        # If tomorrow's price < today's price → DOWN (0)
+
         
         close_tomorrow = close[1:]
         close_today = close[:-1]
         target = (close_tomorrow > close_today).astype(int)
         
-        # Remove last day (we don't know tomorrow's price)
         dates = dates[:-1]
         close_today = close_today
         volume = volume[:-1]
         
-        # Create DataFrame
         df = pd.DataFrame({
             'Date': dates,
             'Stock': stock,
@@ -117,12 +105,12 @@ for stock in stocks:
         continue
 
 
-# 5. COMBINE ALL DATA
 
 
-print("\n" + "=" * 60)
+
+
 print("COMBINING DATA")
-print("=" * 60)
+
 
 df_combined = pd.concat(all_data, ignore_index=True)
 
@@ -130,24 +118,23 @@ print(f"Total records: {len(df_combined)}")
 print(f"Unique stocks: {df_combined['Stock'].nunique()}")
 print(f"Date range: {df_combined['Date'].min().date()} to {df_combined['Date'].max().date()}")
 
-# Target distribution
+
 target_count = df_combined['Target'].value_counts()
 print(f"\nTarget distribution:")
 print(f"  DOWN (0): {target_count.get(0, 0):6d} ({target_count.get(0, 0)/len(df_combined)*100:.1f}%)")
 print(f"  UP   (1): {target_count.get(1, 0):6d} ({target_count.get(1, 0)/len(df_combined)*100:.1f}%)")
 
 
-# 6. SAVE DATA
 
 
-print("\n" + "=" * 60)
+
 print("SAVING DATA")
-print("=" * 60)
+
 
 df_combined.to_csv("data_raw.csv", index=False)
 print("✓ Raw data saved: data_raw.csv")
 
-# Summary by stock
+
 summary = df_combined.groupby('Stock').agg({
     'Close': ['min', 'max', 'mean'],
     'Volume': 'mean',
@@ -157,6 +144,6 @@ summary = df_combined.groupby('Stock').agg({
 summary.to_csv("data_summary.csv")
 print("✓ Summary saved: data_summary.csv")
 
-print("\n" + "=" * 60)
-print("DONE!")
-print("=" * 60)
+
+print("done!")
+
