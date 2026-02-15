@@ -2,12 +2,11 @@ import numpy as np
 import pandas as pd
 
 
-print("FEATURE ENGINEERING")
+
 
 df = pd.read_csv("data_raw.csv")
 df['Date'] = pd.to_datetime(df['Date'])
 
-print(f"\nInput data shape: {df.shape}")
 
 
 features_list = []
@@ -81,37 +80,12 @@ for stock in df['Stock'].unique():
 
     features['Volume_SMA_20'] = pd.Series(volume).rolling(20).mean().values
     features['Volume_Ratio'] = (pd.Series(volume) / (pd.Series(volume).rolling(20).mean() + 1e-8)).values
-
     features['Price_Range_20'] = (pd.Series(prices).rolling(20).max() - pd.Series(prices).rolling(20).min()).values
-    
     features_list.append(features)
-    print(f"✓ {stock:6s} - features created")
-
-
-
-print("COMBINING FEATURES")
-
-
+    
 df_features = pd.concat(features_list, ignore_index=True)
-
-print(f"Total records: {len(df_features)}")
-print(f"Total features: {len(df_features.columns)}")
-
-
-print("CLEANING DATA")
-
-
-print(f"Missing values: {df_features.isnull().sum().sum()}")
-
-
 df_features = df_features.fillna(method='ffill').fillna(method='bfill')
-
-
 df_features = df_features.dropna()
-
-print(f"After cleaning: {len(df_features)} records")
-
 df_features.to_csv("data_features.csv", index=False)
-print("saved")
 
 
